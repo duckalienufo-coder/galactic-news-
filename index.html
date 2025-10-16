@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Galaktikus Hírügynökség | GHU</title>
+  <meta name="description" content="Galaktikus hírek, közlemények, csillagközi piaci jelentések, flotta-briefingek. Statikus demó." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%230af'%3E%3C/circle%3E%3Cpath d='M18 34l10-4 6-12 6 12 10 4-10 4-6 12-6-12z' fill='white'/%3E%3C/svg%3E">
+  <style>
+    /* --- Reset / Base --- */
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:#050614;color:#e8ecff;line-height:1.5}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    :root{
+      --bg:#050614;
+      --bg2:#0a0f2a;
+      --card:rgba(255,255,255,0.06);
+      --card-strong:rgba(255,255,255,0.12);
+      --text:#e8ecff;
+      --muted:#95a0cf;
+      --brand:#6cf;
+      --accent:#8ef;
+      --good:#48e;
+      --bad:#f56;
+      --warn:#fc5;
+      --gradient: radial-gradient(1200px 600px at 10% -10%, rgba(100,150,255,.25), transparent 60%),
+                  radial-gradient(800px 400px at 100% 20%, rgba(120,255,220,.18), transparent 60%),
+                  radial-gradient(1000px 500px at 50% 120%, rgba(255,180,120,.12), transparent 60%);
+    }
+
+    /* --- Starfield background --- */
+    .bg-space{
+      position:fixed;inset:0;z-index:-2;background:var(--bg);overflow:hidden
+    }
+    .stars, .stars2, .stars3{position:absolute;inset:0;background-repeat:repeat;background-size:contain;animation: drift linear infinite}
+    .stars{background-image:radial-gradient(2px 2px at 20px 30px,#fff8 40%,transparent 42%),radial-gradient(1px 1px at 80px 120px,#fff6 40%,transparent 42%),radial-gradient(1px 1px at 200px 80px,#fff5 40%,transparent 42%);animation-duration:140s;opacity:.6}
+    .stars2{background-image:radial-gradient(1px 1px at 50px 10px,#fff5 40%,transparent 42%),radial-gradient(2px 2px at 150px 90px,#fff7 40%,transparent 42%);animation-duration:220s;opacity:.5}
+    .stars3{background-image:radial-gradient(1px 1px at 30px 60px,#fff4 40%,transparent 42%),radial-gradient(2px 2px at 200px 140px,#fff3 40%,transparent 42%);animation-duration:320s;opacity:.35}
+    @keyframes drift{from{background-position:0 0}to{background-position:-800px 1600px}}
+
+    .bg-nebula{position:fixed;inset:0;z-index:-1;background:var(--gradient);filter:blur(40px);opacity:.9}
+
+    /* --- Layout --- */
+    .container{max-width:1200px;margin-inline:auto;padding:24px}
+    header{position:sticky;top:0;backdrop-filter:blur(10px);background:linear-gradient(180deg,rgba(5,6,20,.85),rgba(5,6,20,.65));border-bottom:1px solid #ffffff18;z-index:10}
+    .head-wrap{display:flex;align-items:center;gap:16px;padding:12px 24px}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.3px}
+    .logo-badge{width:36px;height:36px;border-radius:12px;background:conic-gradient(from 200deg at 50% 50%, #6cf, #8ef, #6cf);display:grid;place-items:center;box-shadow:0 6px 20px #6cf3}
+    .logo-badge svg{width:20px;height:20px}
+    .brand{font-size:1.1rem}
+    nav{margin-left:auto;display:flex;gap:16px;flex-wrap:wrap}
+    .pill{padding:8px 12px;border-radius:999px;background:transparent;border:1px solid #ffffff22;color:#e8ecffcc}
+    .pill.active{background:linear-gradient(180deg, #172248, #101633);border-color:#4ca3ff44;box-shadow:0 0 0 1px #4ca3ff22 inset}
+
+    /* Breaking ticker */
+    .ticker{border-top:1px solid #ffffff18;border-bottom:1px solid #ffffff18;background:linear-gradient(180deg,#0a0f2a99,#0a0f2a66)}
+    .ticker-inner{display:flex;gap:24px;overflow:hidden;white-space:nowrap}
+    .ticker-track{display:inline-block;animation:marquee 28s linear infinite;padding-block:8px}
+    @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    .tag{font-size:.75rem;padding:.2rem .5rem;border:1px solid #ffffff22;border-radius:6px;margin-right:10px;color:#cfe2ff}
+    .tag.warn{border-color:#fc5a; color:#ffdca1}
+    .tag.good{border-color:#8efa; color:#bfe8ff}
+
+    /* Hero */
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;margin:24px 0}
+    @media (max-width:900px){.hero{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid #ffffff18;border-radius:16px;box-shadow:0 10px 30px #0008}
+    .card:hover{border-color:#ffffff33}
+    .card-pad{padding:18px}
+    .thumb{border-radius:12px;background:linear-gradient(135deg,#102348,#081126);min-height:220px;display:grid;place-items:center;position:relative;overflow:hidden}
+    .thumb::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 60% 20%, #6cf2 0%, transparent 60%), radial-gradient(90% 60% at 20% 80%, #8ef1 0%, transparent 60%);mix-blend-mode:screen;opacity:.75}
+    .eyebrow{font-size:.78rem;color:var(--muted);letter-spacing:.2px}
+    h1{margin:.3rem 0 0;font-size:2rem;line-height:1.2}
+    .meta{display:flex;gap:14px;align-items:center;color:#b9c4f1;font-size:.86rem}
+
+    /* Grid */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+    @media (max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:720px){.grid{grid-template-columns:1fr}}
+    .chip{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;padding:6px 10px;border:1px solid #ffffff22;border-radius:999px;color:#cfe2ff99}
+    .title{font-weight:700;font-size:1.1rem;margin:.4rem 0}
+    .lead{color:#c6d2ffcc}
+
+    /* Sidebar */
+    .aside{display:flex;flex-direction:column;gap:16px}
+    .list{display:flex;flex-direction:column}
+    .list a{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px;border-bottom:1px dashed #ffffff1f}
+    .bullet{width:8px;height:8px;border-radius:3px;background:#6cf;align-self:center;box-shadow:0 0 0 3px #6cf22}
+
+    /* Footer */
+    footer{margin-top:40px;padding:28px 0;border-top:1px solid #ffffff18;color:#93a1d9}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
+    @media (max-width:900px){.footer-grid{grid-template-columns:1fr}}
+    .small{font-size:.85rem;color:#a7b4ee}
+
+    /* Buttons */
+    .btn{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;border:1px solid #ffffff22;background:linear-gradient(180deg,#0b1230,#0a1026);color:#e8ecff}
+    .btn.primary{border-color:#4ca3ff66;background:linear-gradient(180deg,#182a5a,#10183a);box-shadow:0 8px 20px #4ca3ff22 inset, 0 8px 30px #173a7a44}
+
+    /* Badges */
+    .badge{display:inline-block;font-size:.7rem;padding:.25rem .5rem;border-radius:6px;border:1px solid #ffffff22;color:#bcd7ff}
+    .badge+.badge{margin-left:6px}
+
+  </style>
+</head>
+<body>
+  <div class="bg-space"><div class="stars"></div><div class="stars2"></div><div class="stars3"></div></div>
+  <div class="bg-nebula"></div>
+
+  <header>
+    <div class="head-wrap container">
+      <div class="logo">
+        <div class="logo-badge" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#031026" stroke-width="2">
+            <path d="M12 2l3.5 7.5L23 11l-7.5 3.5L12 22l-3.5-7.5L1 11l7.5-1.5L12 2z" fill="white"/>
+          </svg>
+        </div>
+        <span class="brand">Galaktikus Hírügynökség</span>
+      </div>
+      <nav>
+        <a class="pill active" href="#">Főoldal</a>
+        <a class="pill" href="#">Közlemények</a>
+        <a class="pill" href="#">Piaci jelentések</a>
+        <a class="pill" href="#">Flotta</a>
+        <a class="pill" href="#">Tudomány</a>
+      </nav>
+      <a class="btn primary" href="#">Hírbejelentés</a>
+    </div>
+    <div class="ticker">
+      <div class="container ticker-inner">
+        <div class="ticker-track">
+          <span class="tag warn">BREAKING</span> Kvantum-vihar miatt késések a Sárga-Ösvény folyosón ·
+          <span class="tag good">PIAC</span> Tritium spot +4.3% az Oort-gyűrűn ·
+          <span class="tag">FLOTTA</span> A 7. Expedíciós Raj visszatért a Perseus-peremről ·
+          <span class="tag">KUTATÁS</span> GMF: élőnek minősített fadarab ügyében ideiglenes morfostop ·
+          <span class="tag warn">FIGYELEM</span> Hyperlane-újrakalibráció 03:00–04:00 ZULU ·
+          <span class="tag">DIPLOMÁCIA</span> Androméda-közeledés: jegyzőkönyv-tervezet kiszivárgott
+        </div>
+        <div class="ticker-track" aria-hidden="true">
+          <span class="tag warn">BREAKING</span> Kvantum-vihar miatt késések a Sárga-Ösvény folyosón ·
+          <span class="tag good">PIAC</span> Tritium spot +4.3% az Oort-gyűrűn ·
+          <span class="tag">FLOTTA</span> A 7. Expedíciós Raj visszatért a Perseus-peremről ·
+          <span class="tag">KUTATÁS</span> GMF: élőnek minősített fadarab ügyében ideiglenes morfostop ·
+          <span class="tag warn">FIGYELEM</span> Hyperlane-újrakalibráció 03:00–04:00 ZULU ·
+          <span class="tag">DIPLOMÁCIA</span> Androméda-közeledés: jegyzőkönyv-tervezet kiszivárgott
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero section -->
+    <section class="hero">
+      <article class="card">
+        <div class="thumb" role="img" aria-label="Nebulán átrepülő hírhajó illusztráció"></div>
+        <div class="card-pad">
+          <div class="eyebrow">FLOTTA • 3265.10.16. ZULU 13:20</div>
+          <h1>Hyperugrás-ablak szűkül: a Kék Háromszög szektorában 22 perces műveleti holtidő</h1>
+          <p class="lead">A Navigációs Parancsnokság riasztást adott ki a mikrolencse-inhomogenitások felerősödése miatt. A kereskedelmi konvojokat a P3–R útvonalra terelik, katonai egységek készenléti fokozaton.</p>
+          <div class="meta">
+            <span class="chip"><span>Forrás:</span> Csillagflotta NAVCOM</span>
+            <span class="chip">Kód: GH-ALERT-7729</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="aside">
+        <div class="card card-pad">
+          <div class="eyebrow">Trend</div>
+          <div class="title">Tritium és Helium-3 heti mutatók</div>
+          <p class="small">Piaci impulzusok a külső felhőből. A spekulatív szegmens fokozott volatilitást mutat.</p>
+          <div style="height:120px;border-radius:10px;background:linear-gradient(180deg,#172248,#0f1737);border:1px solid #ffffff22;display:grid;place-items:center;color:#8ef;">Mini-chart placeholder</div>
+        </div>
+        <div class="card">
+          <div class="card-pad">
+            <div class="eyebrow">Olvasott</div>
+            <div class="list">
+              <a href="#"><span class="bullet"></span><span>GMF közlemény: az élőnek minősített tárgyak átmeneti védelme</span></a>
+              <a href="#"><span class="bullet" style="background:#fc5"></span><span>Perseus-perem incidens: protokollfrissítés 4. módosítás</span></a>
+              <a href="#"><span class="bullet" style="background:#8ef"></span><span>Diplomáciai csatornák: északi kvadráns forródrótja</span></a>
+              <a href="#"><span class="bullet" style="background:#9f7"></span><span>Flottamozgások: 7. Expedíciós Raj debrief</span></a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Articles grid -->
+    <section class="grid">
+      <article class="card card-pad">
+        <span class="badge">Közlemény</span>
+        <div class="title">GMF: Morfostabilitási korlátozás hatályban a 2067. évi GXBT-277/7/a szerint</div>
+        <p class="lead">A Tanács megerősítette, hogy a kvantum-életjelet mutató kézműves tárgyak ideiglenesen az élő entitások kategóriájába sorolandók.</p>
+        <div class="meta"><span>FGE-23/Δ</span><span>•</span><span>Hivatkozási szám: GMF-1127</span></div>
+      </article>
+
+      <article class="card card-pad">
+        <span class="badge">Piac</span>
+        <div class="title">Oort-gyűrű: tritium spot +4.3%, heli-3 +1.1%</div>
+        <p class="lead">A Szabad Kereskedelmi Tanács a külső bányász-frakciók aktivitásának élénkülését jelenti, szállítási kvóták felülvizsgálata várható.</p>
+        <div class="meta"><span>SKT</span><span>•</span><span>Jelentés: P-8832</span></div>
+      </article>
+
+      <article class="card card-pad">
+        <span class="badge">Flotta</span>
+        <div class="title">7. Expedíciós Raj: visszatérés a Perseus-peremről</div>
+        <p class="lead">Az előzetes debrief szerint három új hiperjelenség került katalógusba, két egység szenzorkészlete kalibrációra szorul.</p>
+        <div class="meta"><span>NAVCOM</span><span>•</span><span>Ref: F-7X-221</span></div>
+      </article>
+
+      <article class="card card-pad">
+        <span class="badge">Tudomány</span>
+        <div class="title">Kvantum-viharok modellezése: mikrolencse-inhomogenitások</div>
+        <p class="lead">A Galaktikus Obszervatórium új szimulációs futásai szerint a navigációs ablakok prediktivitása 12%-kal nőhet.</p>
+        <div class="meta"><span>OBSERV</span><span>•</span><span>Preprint: QW-113</span></div>
+      </article>
+
+      <article class="card card-pad">
+        <span class="badge">Diplomácia</span>
+        <div class="title">Androméda-közeledés: jegyzőkönyv-tervezet vitaanyaga</div>
+        <p class="lead">A tárgyalófelek a megosztott hipersávok hozzáférési rendjéről egyeztetnek. Közös incidenskezelési elvek körvonalazódnak.</p>
+        <div class="meta"><span>KONZÍLIUM</span><span>•</span><span>Dok: A-Δ-09</span></div>
+      </article>
+
+      <article class="card card-pad">
+        <span class="badge">Közlekedés</span>
+        <div class="title">Sárga-Ösvény folyosó: 90 perces torlódás várható</div>
+        <p class="lead">A Navigációs Hatóság ideiglenes kvótát vezet be a 03:00–04:00 ZULU közötti ablakban, kerülő az R–Lánc felé.</p>
+        <div class="meta"><span>HATÓSÁG</span><span>•</span><span>Rendelet: NAV-310</span></div>
+      </article>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <div class="title">GHU • Galaktikus Hírügynökség</div>
+        <p class="small">Fiktív, statikus demóoldal. Nincsenek sütik, nincsen adatgyűjtés. A hírek nem valósak, csak világépítéshez.</p>
+      </div>
+      <div>
+        <div class="eyebrow">Kapcsolat</div>
+        <p class="small">press@ghu.example • biztonság: cert@ghu.example</p>
+      </div>
+      <div>
+        <div class="eyebrow">Meta</div>
+        <p class="small">Verzió: 1.0 • Licenc: MIT • Készült: HTML + CSS</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
